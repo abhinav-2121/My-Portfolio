@@ -1,0 +1,405 @@
+import wixUsers from 'wix-users';
+import wixStorage from 'wix-storage';
+import wixData from 'wix-data';
+import { session } from 'wix-storage';
+import wixLocation from 'wix-location';
+import { currentMember } from 'wix-members';
+
+
+currentMember.getMember()
+  .then((member) => {
+
+$w.onReady(function () {
+  const titleField = "title"; // change this to the name of the field in the "CashDrops" collection where you want to store the email
+
+  // Get the current user's email and insert it into the title field when button6 is clicked
+  $w("#button6").onClick(() => {
+    // Check if the timer has expired
+    if (timerExpired()) {
+      const user = wixUsers.currentUser;
+      const email = `${member.loginEmail}`;
+      const newItem = { [titleField]: email };
+      wixData.insert("CashDrops", newItem)
+        .then(() => {
+          $w('#button6').disable()
+          $w('#text61').text = "Entered Cash Drop!"
+          wixLocation.to(wixLocation.url)
+
+          // Set a 1-hour timer before allowing the button to be clicked again
+          setTimer();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      console.log("Button click is not allowed yet.");
+    }
+  });
+
+  // Update text56 with the time left until the next click
+  setInterval(() => {
+    const timeLeft = getTimeLeft();
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    $w("#text61").text = `${minutes}m ${seconds}s`;
+    if ($w('#text61').text == "NaNm NaNs" || $w('#text61').text == "0m 0s" ){
+      $w('#text61').text = "Entry Available!"
+    }
+    if (seconds > 0){
+      $w('#button6').disable()
+      $w("#button6").style.backgroundColor = "#808080"; // set background color to gray
+    } 
+  }, 1000);
+});
+
+// Store the expiration time in local storage
+function setTimer() {
+  const expirationTime = Date.now() + 60 * 60 * 1000; // current timestamp + 1 hour in milliseconds
+  const userId = wixUsers.currentUser.id;
+  wixStorage.session.setItem(`expirationTime_${userId}`, expirationTime);
+}
+
+// Check if the timer has expired
+function timerExpired() {
+  const userId = wixUsers.currentUser.id;
+  const expirationTime = wixStorage.session.getItem(`expirationTime_${userId}`);
+  if (!expirationTime) {
+    return true; // timer has not been set
+  }
+  return Date.now() > parseInt(expirationTime);
+}
+
+// Get the time left until the next click is allowed
+function getTimeLeft() {
+  const userId = wixUsers.currentUser.id;
+  const expirationTime = wixStorage.session.getItem(`expirationTime_${userId}`);
+  const timeLeft = Math.ceil((parseInt(expirationTime) - Date.now()) / 1000); // convert milliseconds to seconds and round up
+  return timeLeft < 0 ? 0 : timeLeft; // don't allow negative time left
+}
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+  });
+
+
+
+
+
+ $w("#button7").onClick(() => {
+	 // 10 IC button
+   $w('#button7').disable(); // disable the button
+   $w('#button8').disable(); // disable the button
+    $w('#button9').disable()
+
+currentMember.getMember()
+  .then((member) => {
+
+
+
+
+
+
+	//get useremail
+	const userEmail = `${member.loginEmail}`;
+  // query the UserData collection for the user's Incredacoins
+  wixData.query("UserData")
+    .eq("title", userEmail)
+    .find()
+    .then((results) => {
+      if (results.length > 0) {
+        let userData = {};
+        let details = results.items[0];
+         userData.first = details.incredacoins; 
+         console.log(userData.first)
+        // check if user has enough Incredacoins to make the purchase
+        if (userData.first >= 10) {
+			//disable button 
+			$w('#button7').disable()
+          // update the CashDrops collection with the user's email
+          const newCashDrop = {
+            "50Ic": userEmail
+          };
+          let userDataI = {};
+        let detailsI = results.items[0];
+         userDataI.first = detailsI._id; 
+         const updatedIncredacoins = userData.first - 10;
+          const updatedUserData = {
+                "_id": userDataI.first,
+                "incredacoins": updatedIncredacoins,
+				"title": userEmail
+              };
+          wixData.update("UserData", updatedUserData)
+          
+            .then(() => {
+              // subtract 10 Incredacoins from the user's total
+              
+               
+              
+              wixData.insert("CashDrops", newCashDrop)
+                .then(() => {
+					
+					
+                  // show success message to the user
+                  console.log("Purchase successful!");
+				  $w('#text62').text = "Successfully entered!"
+				  wixLocation.to(wixLocation.url)
+                })
+                .catch((error) => {
+                  console.log("Error updating user data: ", error);
+				  $w('#text62').text = "Error. Try again later"
+                });
+            })
+            .catch((error) => {
+              console.log($w('#text62').text = "Error. Try again later");
+            });
+        } else {
+          // show error message to the user
+          console.log("Not enough Incredacoins!");
+		  $w('#text62').text = "Not enough incredacoins"
+      $w('#text63').text = "Not enough incredacoins"
+       $w('#text64').text = "Not enough incredacoins"
+
+        }
+      } else {
+        // show error message to the user
+        console.log("User data not found!");
+		$w('#text62').text = "Error. Please contact staff through chatbox"
+      }
+    })
+    .catch((error) => {
+      console.log("Error querying user data: ", error);
+	  $w('#text62').text = "Error. Try again later"
+    });
+
+  });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ $w("#button8").onClick(() => {
+	 // 10 IC button
+   $w('#button8').disable(); // disable the button
+    $w('#button9').disable()
+
+currentMember.getMember()
+  .then((member) => {
+
+
+
+
+
+
+	//get useremail
+	const userEmail = `${member.loginEmail}`;
+  // query the UserData collection for the user's Incredacoins
+  wixData.query("UserData")
+    .eq("title", userEmail)
+    .find()
+    .then((results) => {
+      if (results.length > 0) {
+        let userData = {};
+        let details = results.items[0];
+         userData.first = details.incredacoins; 
+         console.log(userData.first)
+        // check if user has enough Incredacoins to make the purchase
+        if (userData.first >= 30) {
+			//disable button 
+			$w('#button8').disable()
+      $w('#button7').disable(); // disable the button
+    $w('#button9').disable()
+          // update the CashDrops collection with the user's email
+          const newCashDrop = {
+            "180Ic": userEmail
+          };
+          let userDataI = {};
+        let detailsI = results.items[0];
+         userDataI.first = detailsI._id; 
+         const updatedIncredacoins = userData.first - 30;
+          const updatedUserData = {
+                "_id": userDataI.first,
+                "incredacoins": updatedIncredacoins,
+				"title": userEmail
+              };
+          wixData.update("UserData", updatedUserData)
+          
+            .then(() => {
+              // subtract 30 Incredacoins from the user's total
+              
+               
+              
+              wixData.insert("CashDrops", newCashDrop)
+                .then(() => {
+					
+					
+                  // show success message to the user
+                  console.log("Purchase successful!");
+				  $w('#text63').text = "Successfully entered!"
+				  wixLocation.to(wixLocation.url)
+                })
+                .catch((error) => {
+                  console.log("Error updating user data: ", error);
+				  $w('#text63').text = "Error. Try again later"
+                });
+            })
+            .catch((error) => {
+              console.log($w('#text63').text = "Error. Try again later");
+            });
+        } else {
+          // show error message to the user
+          console.log("Not enough Incredacoins!");
+		  $w('#text63').text = "Not enough incredacoins"
+       $w('#text64').text = "Not enough incredacoins"
+        $w('#text62').text = "Not enough incredacoins"
+        }
+      } else {
+        // show error message to the user
+        console.log("User data not found!");
+		$w('#text63').text = "Error. Please contact staff through chatbox"
+      }
+    })
+    .catch((error) => {
+      console.log("Error querying user data: ", error);
+	  $w('#text63').text = "Error. Try again later"
+    });
+
+  });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// button 9
+
+
+
+
+
+ $w("#button9").onClick(() => {
+	 // 10 IC button
+    $w('#button9').disable()
+
+currentMember.getMember()
+  .then((member) => {
+
+
+
+
+
+
+	//get useremail
+	const userEmail = `${member.loginEmail}`;
+  // query the UserData collection for the user's Incredacoins
+  wixData.query("UserData")
+    .eq("title", userEmail)
+    .find()
+    .then((results) => {
+      if (results.length > 0) {
+        let userData = {};
+        let details = results.items[0];
+         userData.first = details.incredacoins; 
+         console.log(userData.first)
+        // check if user has enough Incredacoins to make the purchase
+        if (userData.first >= 50) {
+			//disable button 
+			$w('#button8').disable()
+      $w('#button7').disable(); // disable the buttons
+    $w('#button9').disable()
+          // update the CashDrops collection with the user's email
+          const newCashDrop = {
+            "300Ic": userEmail
+          };
+          let userDataI = {};
+        let detailsI = results.items[0];
+         userDataI.first = detailsI._id; 
+         const updatedIncredacoins = userData.first - 50;
+          const updatedUserData = {
+                "_id": userDataI.first,
+                "incredacoins": updatedIncredacoins,
+				"title": userEmail
+              };
+          wixData.update("UserData", updatedUserData)
+          
+            .then(() => {
+              // subtract 30 Incredacoins from the user's total
+              
+               
+              
+              wixData.insert("CashDrops", newCashDrop)
+                .then(() => {
+					
+					
+                  // show success message to the user
+                  console.log("Purchase successful!");
+				  $w('#text64').text = "Successfully entered!"
+				  wixLocation.to(wixLocation.url)
+                })
+                .catch((error) => {
+                  console.log("Error updating user data: ", error);
+				  $w('#text64').text = "Error. Try again later"
+                });
+            })
+            .catch((error) => {
+              console.log($w('#text64').text = "Error. Try again later");
+            });
+        } else {
+          // show error message to the user
+          console.log("Not enough Incredacoins!");
+		  $w('#text64').text = "Not enough incredacoins"
+       $w('#text64').text = "Not enough incredacoins"
+        $w('#text62').text = "Not enough incredacoins"
+        }
+      } else {
+        // show error message to the user
+        console.log("User data not found!");
+		$w('#text64').text = "Error. Please contact staff through chatbox"
+      }
+    })
+    .catch((error) => {
+      console.log("Error querying user data: ", error);
+	  $w('#text64').text = "Error. Try again later"
+    });
+
+  });
+
+});
