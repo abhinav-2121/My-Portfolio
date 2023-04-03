@@ -1,0 +1,102 @@
+import wixUsers from 'wix-users';
+import wixData from 'wix-data';
+import { currentMember } from 'wix-members';
+import wixLocation from 'wix-location';
+$w.onReady(function () {
+  // get the button elements by their IDs
+  const button6 = $w("#button6");
+  const button7 = $w("#button7");
+
+  currentMember.getMember()
+    .then((member) => {
+      const email = `${member.loginEmail}`;
+ 
+      // query the UserData collection to get the user's incredacoins balance
+      wixData.query("UserData")
+        .eq("title", email)
+        .find()
+        .then((results) => {
+     
+          const incredacoins = results.items[0].incredacoins;
+
+          // add event listeners to the buttons
+          button6.onClick(() => {
+            if (incredacoins >= 550) {
+              // reduce 550 incredacoins from the user's balance
+              const newBalance = incredacoins - 550;
+              // update the user's incredacoins balance in the UserData collection
+              wixData.update("UserData", { "_id": results.items[0]._id, "incredacoins": newBalance, "title": email  })
+                .then(() => {
+                  // insert a new item into the 'CashOuts' database
+                  let toInsert = {
+                    title: email,
+                    vBucks: "8€ (1000 VB)",
+                  }
+                  wixData.insert("Withdraws", toInsert)
+                    .then(() => {
+                      // handle success
+                      button6.disable()
+                      $w('#text60').text = "Succesfully sent for approval!"
+                      console.log("New item inserted");
+                      wixLocation.to(wixLocation.url)
+                    })
+                    .catch((error) => {
+                      // handle error
+                      console.error(error);
+                      $w('#text60').text = "Error. Try again later"
+                    });
+                })
+                .catch((error) => {
+                  // handle error
+                  console.error(error);
+                });
+            } else {
+              // handle error: not enough incredacoins
+              console.error("Not enough incredacoins");
+              $w('#text60').text = "Not enough Incredacoins"
+            }
+          });
+
+          button7.onClick(() => {
+            if (incredacoins >= 1300) {
+              // reduce 1300 incredacoins from the user's balance
+              const newBalance = incredacoins - 1300;
+              // update the user's incredacoins balance in the UserData collection
+              wixData.update("UserData", { "_id": results.items[0]._id, "incredacoins": newBalance, "title": email })
+                .then(() => {
+                  // insert a new item into the 'CashOuts' database
+                  let toInsert = {
+                    title: email,
+                    vBucks: "20€ (2800 VB)",
+                  }
+                  wixData.insert("Withdraws", toInsert)
+                    .then(() => {
+                      // handle success
+                      button6.disable()
+                      $w('#text59').text = "Succesfully sent for approval!"
+                      console.log("New item inserted");
+                      wixLocation.to(wixLocation.url)
+                    })
+                    .catch((error) => {
+                      // handle error
+                      console.error(error);
+                      $w('#text59').text = "Error. Try again later"
+                    });
+                })
+                .catch((error) => {
+                  // handle error
+                  console.error(error);
+                });
+            } else {
+              // handle error: not enough incredacoins
+              console.error("Not enough incredacoins");
+              $w('#text59').text = "Not enough Incredacoins"
+            }
+          });
+        })
+        .catch((error) => {
+          // handle error
+          console.error(error);
+        });
+    });
+});
