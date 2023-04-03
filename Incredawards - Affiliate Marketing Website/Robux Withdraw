@@ -1,0 +1,75 @@
+import wixData from 'wix-data';
+import wixUsers from 'wix-users';
+import { currentMember } from 'wix-members';
+import wixLocation from 'wix-location';
+
+currentMember.getMember()
+  .then((member) => {
+
+    const currentUserEmail = `${member.loginEmail}`;
+
+    $w.onReady(function () {
+      $w("#button23").onClick(function () {
+
+        // Query the "UserData" collection to get the corresponding user's incredacoin value
+        wixData.query("UserData")
+          .eq("title", currentUserEmail)
+          .find()
+          .then((results) => {
+            if (results.items.length > 0) {
+              let userIncredacoinValue = results.items[0].incredacoins;
+
+              // Get the value from input235
+              let robux = Number($w("#input235").value);
+
+              // Check if the user's incredacoin value is greater than the value in input235
+              if (userIncredacoinValue >= robux) {
+                // Query the "UserData" collection to get the corresponding user ID
+                wixData.query("UserData")
+                  .eq("title", currentUserEmail)
+                  .find()
+                  .then((results) => {
+                    if (results.items.length > 0) {
+                      let usersID = results.items[0]._id;
+
+                      // Insert data from input234 and input235 into "Withdraw" collection
+                      let title = $w("#input234").value;
+
+                      wixData.insert("Withdraws", { "title": title, "robux": robux })
+                        .then((results) => {
+                          $w("#button23").disable();
+                          console.log("Data inserted successfully");
+                          $w('#text57').text = "Succesfully sent for approval!";
+
+                          // Update the user's incredacoin value by reducing it by the value in input235
+                          let updatedIncredacoinValue = userIncredacoinValue - robux;
+                          wixData.update("UserData", { "_id": usersID, "incredacoins": updatedIncredacoinValue, "title": currentUserEmail})
+                            .then((results) => {
+                              
+                              console.log("User data updated successfully");
+                              wixLocation.to(wixLocation.url);
+                            })
+                            .catch((error) => {
+                              console.log(error);
+                            });
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                        });
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              } else {
+                console.log("You do not have enough Incredacoin to withdraw this amount");
+                $w('#text57').text = "You do not have enough Incredacoins to withdraw this amount. Your max is " + userIncredacoinValue + " Robux";
+              }
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    });
+  });
