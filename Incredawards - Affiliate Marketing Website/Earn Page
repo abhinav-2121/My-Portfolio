@@ -1,0 +1,54 @@
+
+import wixUsers from 'wix-users';
+import wixLocation from 'wix-location';
+import { currentMember } from 'wix-members';
+import wixData from 'wix-data';
+
+
+export function button10_click_1(event) {
+	
+var UserId = wixUsers.currentUser.id;
+var url = "https://offers.cpx-research.com/index.php?app_id={INSERT_ID}&ext_user_id=" + UserId
+console.log(url);
+wixLocation.to(url);
+}
+
+$w("#button13").onClick((event) => {
+  const userId = wixUsers.currentUser.id;
+  const url = "https://wall.adgaterewards.com/{INSERT_ID}/" + userId;
+  console.log(url);
+  wixLocation.to(url);
+});
+
+
+
+
+
+currentMember.getMember()
+  .then((member) => {
+
+      // Get the current user's email
+      const currentUserEmail = member.loginEmail;
+
+      // Add a click event handler to the button
+      $w("#button12").onClick((event) => {
+
+        // Get the existing item to update
+        wixData.get("CashOuts", "title")
+          .then((item) => {
+            
+            // Update the title field with the current user's email
+            item.title = currentUserEmail;
+            
+            // Use the update() function to update the item in the collection
+            return wixData.update("CashOuts", item);
+          })
+          .then((updatedItem) => {
+            console.log("Item updated successfully");
+
+          })
+          .catch((error) => {
+            console.log("Item update failed", error);
+          });
+      });
+});
