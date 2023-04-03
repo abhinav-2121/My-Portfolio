@@ -1,1 +1,48 @@
+import { currentMember } from 'wix-members';
+import wixData from 'wix-data';
+import wixUsers from 'wix-users';
+
+
+
+
+
+currentMember.getMember()
+  .then((member) => {
+
+
+	const email = `${member.loginEmail}`;
+	console.log(email)
+    wixData.query("UserData")
+
+  .eq("title", email)
+  .find()
+  .then((results) => {
+    if(results.items.length > 0) {
+      
+       
+
+        let userData = {};
+        let details = results.items[0];
+         userData.first = details.incredacoins; 
+         console.log(userData.first)
+         $w('#text54').text = userData.first.toString()
+
+
+           
+    } else {
+      console.log("No query results found (Not Logged in)")
+      $w('#text54').text = "0"
+    }
+  })
+  .catch((err) => {
+    console.log(err);
+    console.log('error')
+  });
+    return member;
+    
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+
 
