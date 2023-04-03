@@ -1,0 +1,15 @@
+import wixUsers from 'wix-users';
+import wixLocation from 'wix-location';
+import wixWindow from 'wix-window';
+
+$w.onReady(function () {
+    $w('#button8').onClick(function () {
+        let email = $w('#loginemail').value;
+        let password = $w('#loginpassword').value;
+        wixUsers.login(email,password)
+        .then(() => {
+            wixWindow. lightbox. close()
+            wixLocation.to(wixLocation.url);
+        })
+    })
+});
