@@ -1,0 +1,329 @@
+//varibales
+var canshoot = true;
+var canshoot1 = true;
+
+var background = createSprite(200, 200);
+var intro = createSprite(200, 200);
+intro.setAnimation("intro");
+intro.scale = 3;
+background.setAnimation("background");
+background.scale = 1;
+var player1 = createSprite(35, 200);
+player1.setAnimation("player1");
+player1.scale = 0.2;
+var player2 = createSprite(365, 200);
+player2.setAnimation("player2");
+player2.scale = 0.2;
+var bullet = createSprite(70, 460);
+bullet.setAnimation("bullet");
+bullet.scale = 0.5;
+bullet.x = 70;
+var bullet1 = createSprite(330, 460);
+bullet1.setAnimation("bullet1");
+bullet1.scale = 0.5;
+bullet1.x = 330;
+var HPbar = createSprite(274, 16);
+HPbar.setAnimation("HP3");
+HPbar.scale = 1.5;
+var HPbar2 = createSprite(127,  16);
+HPbar2.setAnimation("HP3");
+HPbar2.scale = 1.5;
+var powerup = createSprite(randomNumber(83,6776),  randomNumber(57,987));
+powerup.setAnimation("powerup");
+powerup.scale = 0.1;
+
+var speed = createSprite(randomNumber(83,6776),  randomNumber(57,987));
+speed.setAnimation("speedup");
+speed.scale = 0.1;
+
+var check = true;
+var guess1 = true;
+var guess2 = true;
+var check2 = true;
+var powerup_checker = true;
+var touch1=true;
+var endgame = true;
+var touch = true;
+var HP2 = 5;
+var HP1 = 5;
+var check3=true;
+
+
+function draw() {
+  
+  //starting - space key
+  if(check2===true&&endgame){
+  if (keyWentDown('space')){
+    
+ guess1 = false;
+ guess2 = false;
+ check = false;
+ intro.visible = false;
+ check2=false;
+   
+ 
+  } 
+  }
+  
+  // powerup checking
+    if(check3){
+    if(keyWentDown("space")){
+      
+    
+    powerup.x=randomNumber(83,308);
+    powerup.y=randomNumber(56,330);
+    powerup_checker=false;
+    check3=false;
+    }
+    }
+  if(bullet.isTouching(powerup)){
+    if (HP1===5) {
+      HP1===5;
+    } else {
+      HP1 = HP1+1;
+    }
+    
+    
+    
+    powerup_checker=true;
+    powerup.x=randomNumber(83,308);
+    powerup.y=randomNumber(56,330);
+  }
+  if(bullet1.isTouching(powerup)){
+    if (HP2===5) {
+      HP2===5;
+    } else {
+      HP2 = HP2+1;
+    }
+    
+    
+    
+    powerup_checker=true;
+    powerup.x=randomNumber(83,308);
+    powerup.y=randomNumber(56,330);
+  }
+  //moving sides
+  if (check===false&&endgame){
+  if(guess1===false){
+  
+ player1.velocityY = -9;
+  
+ 
+  }
+  }
+  if (check===false&&endgame){
+  if(guess1===true  && check  === false){
+  
+ player1.velocityY = 9;
+  
+ 
+  }
+  }
+  if(check===false&&endgame){
+  if(guess2===false){
+  
+ player2.velocityY = 9;
+  
+ 
+  }
+  }
+  if (check===false&&endgame){
+  if(guess2===true  && check  === false){
+  
+ player2.velocityY = -9;
+  
+ 
+  }
+  } 
+  //bouncing for P2
+  if (player2.y <=39) {
+  
+ guess2 = false;
+  }
+  if (player2.y >=361) {
+  
+ guess2 = true;
+  }
+  //Bouncing P1
+  if (player1.y <=39) {
+  
+ guess1 = true;
+  
+ 
+  }
+  if (player1.y >=361) {
+  
+ guess1 = false;
+  }
+  //manual dirction changing for p1 
+  if (check===false&&endgame){
+  
+ if (keyWentDown("a")){
+  
+  
+guess1 = true;
+  
+  }
+  }
+  if (keyWentDown("a") && player1.velocityY === 9&&endgame){
+  
+ guess1 = false;
+  }
+  //manual for p2 
+  if(check===false){
+  if (keyWentDown("l")){
+  
+ guess2 = true;
+  
+  
+  
+  
+  
+  
+  }
+  }
+  if (keyWentDown("l") && player2.velocityY === -9&&endgame){
+  
+ guess2 = false;
+  }
+  
+// collisions P2
+if(bullet.isTouching(player2)){
+  if (touch===true) {
+    HP2 = HP2 - 1;
+    touch = false;
+  }
+}
+  if (HP2===5) {
+    HPbar.setAnimation("HP5");
+  }
+  if (HP2===4) {
+    HPbar.setAnimation("HP4");
+  }
+  if (HP2===3) {
+    HPbar.setAnimation("HP3");
+  }
+  if (HP2===2) {
+    HPbar.setAnimation("HP2");
+  }
+  if (HP2===1) {
+    HPbar.setAnimation("HP1");
+  }
+  // collisions P1
+if(bullet1.isTouching(player1)){
+  if (touch1===true) {
+    HP1 = HP1 - 1;
+    touch1 = false;
+  }
+}
+
+ 
+  if (HP1===5) {
+    HPbar2.setAnimation("HP5");
+  }
+  if (HP1===4) {
+    HPbar2.setAnimation("HP4");
+  }
+  if (HP1===3) {
+    HPbar2.setAnimation("HP3");
+  }
+  if (HP1===2) {
+    HPbar2.setAnimation("HP2");
+  }
+  if (HP1===1) {
+    HPbar2.setAnimation("HP1");
+  } 
+  
+  //gameover P2
+  if (HP2===0) {
+    playSound("sound://category_explosion/retro_game_classic_explosion_1.mp3", false);
+    
+    player2.setAnimation("dead");
+    player2.velocityY = 0;
+    player2.scale=0.3;
+    var gameover2 = createSprite(320,200);
+    gameover2.setAnimation("gameover2");
+    gameover2.scale=0.3;
+    
+    HPbar.visible=false;
+    bullet1.visible=false;
+    player1.velocityY = -2;
+    
+    if(player1.velocityY==-2){
+      player1.setAnimation("player1up");
+    }
+    
+    
+    endgame=false;
+     
+  }
+  //gameover P1
+  if (HP1===0) {
+    playSound("sound://category_explosion/retro_game_classic_explosion_1.mp3", false);
+    
+    player1.setAnimation("dead");
+    player1.velocityY = 0;
+    player1.scale=0.3;
+    var gameover1 = createSprite(60,197);
+    gameover1.setAnimation("gameover2");
+    gameover1.scale=0.3;
+    
+    HPbar2.visible=false;
+    bullet1.visible=false;
+    player2.velocityY = -2;
+    
+    if(player2.velocityY==-2){
+      player2.setAnimation("player1up");
+    }
+    
+    
+    endgame=false;
+     
+  }
+  
+  //simultaneous collision
+  if(HP1===0&&HP2===0){
+    HPbar.visible=false;
+    HPbar2.visible=false;
+    player1.velocityY=0;
+    player2.velocityY=0;
+    player1.setAnimation("dead");
+    player2.setAnimation("dead");
+    var gameover3=createSprite(200,200);
+    gameover3.setAnimation("gameover2");
+    endgame=false;
+  }
+shoot();
+shoot1();
+  if ((bullet1.x)<=-30&&endgame) {
+    canshoot1 = true;
+    touch1=true;
+  }
+  if (bullet.x>=430&&endgame) {
+    canshoot = true;
+    touch = true;
+  }
+  
+  // power up
+  
+  drawSprites();
+}
+// bullet
+function shoot() {
+  if (keyWentDown("a")&& canshoot) {
+    playSound("sound://default.mp3", false);
+    bullet.x = 70;
+    bullet.y = player1.y;
+    bullet.velocityX = 10;
+    canshoot=false;
+  }
+}
+//bullet1
+function shoot1() {
+  if (keyWentDown("l")&& canshoot1) {
+    bullet1.x = 330;
+    bullet1.y = player2.y;
+    bullet1.velocityX = -10;
+    canshoot1=false;
+  }
+}
