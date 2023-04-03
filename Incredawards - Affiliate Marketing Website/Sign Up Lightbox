@@ -1,0 +1,27 @@
+import wixUsers from 'wix-users';
+import wixLocation from 'wix-location';
+import wixWindow from 'wix-window';
+import wixData from 'wix-data';
+
+$w.onReady(function () {
+    $w('#button8').onClick(function () {
+		let toInsert = {
+  "title":        $w('#email').value,
+  "incredacoins":   0
+	};
+        let email = $w('#email').value;
+        let password = $w('#password').value;
+        wixUsers.register(email,password)
+        .then(() => {
+			wixData.insert("UserData", toInsert)
+  .then((item) => {
+console.log(item); //see item below
+    })
+  .catch((err) => {
+    console.log(err);
+  });
+			wixWindow. lightbox. close()
+
+        })
+    })
+});
