@@ -1,0 +1,83 @@
+import wixUsers from 'wix-users';
+import wixData from 'wix-data';
+import { currentMember } from 'wix-members';
+import wixLocation from 'wix-location';
+
+
+
+export function button13_click(event) {
+  currentMember.getMember()
+    .then((member) => {
+      const email = `${member.loginEmail}`;
+      const promocode = $w("#input1").value;
+
+      wixData.query("Promocodes")
+        .eq("title", promocode)
+        .find()
+        .then((results) => {
+          if (results.items.length > 0) {
+            const promoCodeDetails = results.items[0];
+            const claims = promoCodeDetails.claims;
+
+            if (claims < 1) {
+              // update claims of the promo code
+              wixData.update("Promocodes", {
+                "_id": promoCodeDetails._id,
+                "claims": claims + 1,
+                "value": promoCodeDetails.value,
+                "title": promoCodeDetails.title
+              })
+                .then((result) => {
+                  console.log(result);
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+
+              // update user's incredacoins balance
+              wixData.query("UserData")
+                .eq("title", email)
+                .find()
+                .then((results) => {
+                  if (results.items.length > 0) {
+                    const userDetails = results.items[0];
+                    const incredacoins = userDetails.incredacoins;
+
+                    wixData.update("UserData", {
+                      "_id": userDetails._id,
+                      "incredacoins": incredacoins + promoCodeDetails.value,
+                      "title": email
+                    })
+                      .then((result) => {
+                        console.log(result);
+                        $w('#text59').text = "Claimed " + promoCodeDetails.value + " Incredacoins!"
+                        wixLocation.to(wixLocation.url);
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                      });
+                  } else {
+                    console.log("No UserData results found (Email not found)");
+                  }
+                })
+                .catch((err) => {
+                  console.error(err);
+                });
+            } else {
+              $w('#text59').text = "Invalid Promocode";
+            }
+          } else {
+            console.log("No Promocodes results found (Invalid Promocode)");
+            $w('#text59').text = "Invalid Promocode";
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+
+      return member;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
